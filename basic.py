@@ -571,6 +571,115 @@ class Parser:
         ))
 
 # DELETED: IF EXPRESSION FUNCTION, COMING BACK AFTER TESTING (Jul. 25 8:02 A.M.)
+# RECREATING: IF EXPRESSION FUNCTION, IN PROGRESS (Jul. 25, 3:04 P.M.)
+
+    def if_expr(self):
+      res = ParseResult()
+      all_cases = res.register(self.if_expr_cases('if'))
+      cases, else_case = all_cases
+      return res.success(IfNode(cases, else_case))
+
+    def if_expr_b(self):
+      return self.if_expr_cases('elif')
+
+    def if_expr_c(self):
+      res = ParseResult()
+      else_case = None
+
+      if self.current_tok.matches(TT_KEYWORD, 'ELSE'):
+        res.register_advancement()
+        self.advance()
+
+        if self.current_tok.type == TT_NEWLINE:
+          res.register_advancement()
+          self.advance()
+
+          statements = res.register(self.statements())
+        if res.error: return res
+        else_case = (statements, True)
+
+        if self.current_tok.matches(TT_KEYWORD, 'END'):
+          res.register_advancement()
+          self.advance()
+        else:
+          return res.failure(InvalidSyntaxError(
+            self.current_tok.pos_start, self.current_tok.pos_end,
+            "Expected 'END'"
+          ))
+      else:
+        expr = res.register(self.expr())
+        if res.error: return res
+        else_case = (expr, False)
+
+    return res.success(else_case)
+
+    def if_expr_cases(self, case_keyword):
+      res = ParseResult()
+      cases = []
+      else_case = None
+
+      if not self.current_tok.matches(TT_KEYWORD, case_keyword):
+        return res.failure(InvalidSyntaxError(
+          self.current_tok.pos_start, self.current_tok.pos_end,
+          f"Expected '{case_keyword}'"
+        ))
+        
+      res.register_advancement()
+      self.advance()
+
+      condition = res.register(self.expr())
+      if res.error: return res
+
+      if not self.current_tok.matches(TT_KEYWORD, 'then'):
+        return res.failure(InvalidSyntaxError(
+          self.current_tok.pos_start, self.current_tok.pos_end,
+          f"Expected 'then'"
+        ))
+
+      res.register_advancement()
+      self.advance()
+
+      if self.current_tok.type == TT_NEWLINE:
+        res.register_advancement()
+        self.advance()
+
+        statements = res.register(self.statements())
+        if res.error: res
+        cases.append((conditions, statements, True))
+
+        if self.current_tok.matches(TT_KEYWORD, 'end'):
+          res.register_advancements()
+          self.advance()
+
+        else:
+          all_cases = res.register(self.if_expr_b_or_c())
+          if res.error: return res
+          new_cases, else_cases = all_cases
+          cases.extend(new_cases)
+
+      else:
+        expr = res.register(self.expr())
+        if res.error: return res
+        cases.append((condition, expr, False))
+
+        all_cases = res.register(self.if_expr_b_or_c())
+        if res.error: return res
+        new_cases, else_cases = all_cases
+        cases.extend(new_cases)
+      
+      return res.success((cases, else_case))
+
+
+
+
+
+
+      
+
+
+
+
+
 
 
     def for_expr(self):
