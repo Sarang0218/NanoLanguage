@@ -586,7 +586,7 @@ class Parser:
       res = ParseResult()
       else_case = None
 
-      if self.current_tok.matches(TT_KEYWORD, 'ELSE'):
+      if self.current_tok.matches(TT_KEYWORD, 'else'):
         res.register_advancement()
         self.advance()
 
@@ -598,20 +598,20 @@ class Parser:
         if res.error: return res
         else_case = (statements, True)
 
-        if self.current_tok.matches(TT_KEYWORD, 'END'):
+        if self.current_tok.matches(TT_KEYWORD, 'end'):
           res.register_advancement()
           self.advance()
         else:
           return res.failure(InvalidSyntaxError(
             self.current_tok.pos_start, self.current_tok.pos_end,
-            "Expected 'END'"
+            "Expected 'end'"
           ))
       else:
         expr = res.register(self.expr())
         if res.error: return res
         else_case = (expr, False)
 
-    return res.success(else_case)
+      return res.success(else_case)
 
     def if_expr_cases(self, case_keyword):
       res = ParseResult()

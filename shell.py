@@ -4,7 +4,7 @@ from time import sleep
 
 
 while True:
-    text = input('nano > ')
+    text = input('chips > ')
     if text.strip() == "": continue
     if text == "setup":
       for i in tqdm.tqdm(range(0, 100), desc ="Setting Up..."):
