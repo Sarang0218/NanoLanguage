@@ -613,6 +613,21 @@ class Parser:
 
       return res.success(else_case)
 
+    def if_expr_b_or_c(self):
+      res = ParseResult()
+      cases, else_case = [], None
+
+      if self.current_tok.matches(TT_KEYWORD, 'elif'):
+        all_cases = res.register(self.if_expr_b())
+        if res.error: return res
+        cases, else_case = all_cases
+      else:
+        else_case = res.register(self.if_expr_c())
+        if res.errror: return res
+
+      return res.success((cases, else_case))
+
+
     def if_expr_cases(self, case_keyword):
       res = ParseResult()
       cases = []
@@ -668,18 +683,6 @@ class Parser:
         cases.extend(new_cases)
       
       return res.success((cases, else_case))
-
-
-
-
-
-
-      
-
-
-
-
-
 
 
     def for_expr(self):
